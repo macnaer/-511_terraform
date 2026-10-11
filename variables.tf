@@ -19,7 +19,7 @@ variable "aws_region" {
 variable "aws_image_id" {
   description = "AMI ID for the primary Ubuntu instance"
   type        = string
-  default     = "ami-0d6d8576c5ce37b8a"
+  default     = "ami-035c8a091035e710a"
 }
 
 variable "aws_instance_type" {
