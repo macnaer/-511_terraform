@@ -7,7 +7,7 @@ Infrastructure as Code (IaC) for this repository.
 ## Hard rules
 1. **ALWAYS ask for confirmation before implementing anything.** Present a plan
    first, wait for explicit user approval, then act.
-2. Never commit secrets. AWS credentials live only in `secrets.tfvars`
+2. Never commit secrets. AWS credentials live only in `secrets.auto.tfvars`
    (gitignored) or environment variables.
 3. Never remove or weaken existing functionality unless explicitly asked.
 4. Always run `terraform init`, `terraform validate` (and `terraform plan`
@@ -33,9 +33,9 @@ Infrastructure as Code (IaC) for this repository.
 ├── main.tf                 # terraform block, provider, module calls
 ├── variables.tf            # input variables (no secrets with defaults)
 ├── outputs.tf              # root outputs
-├── terraform.tfvars        # non-secret values (gitignored)
-├── secrets.tfvars          # AWS credentials (gitignored, NEVER commit)
-├── secrets.tfvars.example  # template for secrets
+├── terraform.tfvars          # non-secret values (gitignored, auto-loaded)
+├── secrets.auto.tfvars       # AWS credentials (gitignored, auto-loaded)
+├── secrets.tfvars.example    # template for secrets
 ├── modules/
 │   └── demo-server/        # EC2 instance + security group + rules
 │       ├── main.tf
@@ -57,8 +57,12 @@ Infrastructure as Code (IaC) for this repository.
 terraform init
 terraform validate
 terraform fmt -recursive
-terraform plan  -var-file="secrets.tfvars"
-terraform apply -var-file="secrets.tfvars"
+terraform plan
+terraform apply
+
+# Target only the demo-server module
+terraform plan  -target=module.demo_server
+terraform apply -target=module.demo_server
 ```
 
 ## Deployment context

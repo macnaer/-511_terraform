@@ -10,9 +10,9 @@ security group in AWS (`eu-north-1`), using the default VPC.
 ├── main.tf                 # terraform block, provider, module call
 ├── variables.tf            # input variables (secrets are sensitive)
 ├── outputs.tf              # instance_id, public_ip, private_ip, sg_id
-├── terraform.tfvars        # non-secret values (gitignored)
-├── secrets.tfvars          # AWS credentials (gitignored, NEVER commit)
-├── secrets.tfvars.example  # template for secrets
+├── terraform.tfvars          # non-secret values (gitignored, auto-loaded)
+├── secrets.auto.tfvars       # AWS credentials (gitignored, auto-loaded, NEVER commit)
+├── secrets.tfvars.example    # template for secrets
 ├── modules/
 │   └── demo-server/        # single module: EC2 + security group + rules
 │       ├── main.tf
@@ -40,8 +40,9 @@ security group in AWS (`eu-north-1`), using the default VPC.
 
 ```powershell
 # 1. Create secrets file from template (once)
-Copy-Item secrets.tfvars.example secrets.tfvars
-# edit secrets.tfvars and put real AWS credentials
+Copy-Item secrets.tfvars.example secrets.auto.tfvars
+# edit secrets.auto.tfvars and put real AWS credentials
+# (`.auto.tfvars` is loaded by Terraform automatically - no -var-file needed)
 
 # 2. Adjust non-secret settings if needed
 notepad terraform.tfvars
@@ -49,10 +50,18 @@ notepad terraform.tfvars
 # 3. Init & validate
 terraform init
 terraform validate
+```
 
-# 4. Review and deploy
-terraform plan  -var-file="secrets.tfvars"
-terraform apply -var-file="secrets.tfvars"
+## Usage
+
+```powershell
+# Full infrastructure
+terraform plan
+terraform apply
+
+# Only the demo-server module
+terraform plan  -target=module.demo_server
+terraform apply -target=module.demo_server
 ```
 
 ## Outputs
@@ -71,13 +80,13 @@ terraform output public_ip
 ## Cleanup
 
 ```powershell
-terraform destroy -var-file="secrets.tfvars"
+terraform destroy
 ```
 
 ## Security notes
 
-- **`secrets.tfvars` is gitignored.** Never commit credentials. Copy
-  `secrets.tfvars.example` instead.
+- **`secrets.auto.tfvars` and `terraform.tfvars` are gitignored.** Never commit
+  credentials. Copy `secrets.tfvars.example` to `secrets.auto.tfvars` instead.
 - **Rotate the previously exposed access key** — credentials were once
   hardcoded in `vars.tf` and must be considered compromised.
 - SSH/HTTP ingress is open to the whole internet (`0.0.0.0/0`) by explicit
