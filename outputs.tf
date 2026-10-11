@@ -1,15 +1,15 @@
 output "instance_id" {
-  description = "ID of the EC2 instance"
+  description = "IDs of the EC2 instances"
   value       = module.demo_server.instance_id
 }
 
 output "public_ip" {
-  description = "Public IP of the EC2 instance"
+  description = "Public IPs of the EC2 instances"
   value       = module.demo_server.public_ip
 }
 
 output "private_ip" {
-  description = "Private IP of the EC2 instance"
+  description = "Private IPs of the EC2 instances"
   value       = module.demo_server.private_ip
 }
 

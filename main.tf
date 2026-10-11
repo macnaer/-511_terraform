@@ -20,6 +20,7 @@ module "demo_server" {
 
   ami_id           = var.aws_image_id
   instance_type    = var.aws_instance_type
+  instance_count   = var.instance_count
   key_name         = var.aws_key_name
   instance_name    = var.instance_name
   root_volume_size = var.root_volume_size
