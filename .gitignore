@@ -1,4 +1,18 @@
+# Terraform
 /.terraform
-/.terraform.lock.hcl
-/terraform.tfstate
-/terraform.tfstate.backup
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+
+# Secrets & local variable files
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.json.example
+
+# Crash logs
+crash.log
+crash.*.log
+
+# CLI
+*.tfplan
