@@ -60,9 +60,9 @@ terraform fmt -recursive
 terraform plan
 terraform apply
 
-# Target only the demo-server module
-terraform plan  -target=module.demo_server
-terraform apply -target=module.demo_server
+# Target only the demo-server module (quotes required in PowerShell)
+terraform plan  "-target=module.demo_server"
+terraform apply "-target=module.demo_server"
 ```
 
 ## Deployment context

@@ -59,9 +59,9 @@ terraform validate
 terraform plan
 terraform apply
 
-# Only the demo-server module
-terraform plan  -target=module.demo_server
-terraform apply -target=module.demo_server
+# Only the demo-server module (quotes required in PowerShell)
+terraform plan  "-target=module.demo_server"
+terraform apply "-target=module.demo_server"
 ```
 
 ## Outputs
