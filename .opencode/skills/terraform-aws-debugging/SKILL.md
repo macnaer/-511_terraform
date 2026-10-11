@@ -5,6 +5,9 @@ description: Diagnose Terraform AWS failures — invalid credentials (InvalidCli
 
 # Terraform AWS Debugging
 
+> The agent never executes Terraform — `terraform ...` commands below are
+> prepared for the engineer. AWS CLI (read-only) may be used by the agent.
+
 ## Triage order
 
 1. Read the exact Terraform error (last 20–30 lines).

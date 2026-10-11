@@ -1,9 +1,12 @@
 ---
 name: terraform-module-authoring
-description: Conventions for writing or modifying Terraform modules and variables in this repo — HCL style, typed and described variables, secrets handling, root volume, IMDSv2, tagging, for_each patterns. Use when creating new .tf resources, modules, or editing existing ones.
+description: Conventions for writing or modifying Terraform modules and variables in this repo — HCL style, typed and described variables, secrets handling, count pattern, user_data with IMDSv2, root volume, tagging, for_each. Use when creating new .tf resources, modules, or editing existing ones.
 ---
 
 # Terraform Module Authoring
+
+> The agent never executes Terraform — the engineer runs all `terraform`
+> commands. Hand over the verification commands at the end.
 
 ## Project layout
 
@@ -54,6 +57,47 @@ resource "aws_security_group_rule" "ingress" {
 
 - Optional object attrs: `optional(type, default)` in `map(object({...}))`.
 
+## Multiple instances: `count`
+
+```hcl
+variable "instance_count" {
+  description = "Number of EC2 instances to create"
+  type        = number
+  default     = 1
+}
+
+resource "aws_instance" "this" {
+  count = var.instance_count
+  # ...
+  tags = merge({ Name = "${var.instance_name}-${count.index + 1}" }, var.tags)
+}
+```
+
+Outputs become lists: `aws_instance.this[*].id`.
+Resource addresses gain an index: `aws_instance.this[0]`.
+
+## `user_data` with IMDSv2
+
+When `http_tokens = "required"`, metadata calls need a token — plain curl
+returns 401:
+
+```hcl
+user_data = <<-EOT
+  #!/bin/bash
+  apt-get update -y
+  apt-get install -y apache2
+  systemctl enable --now apache2
+  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  PUBLIC_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4)
+  echo "<h1>Hello from $(hostname) - $PUBLIC_IP</h1>" > /var/www/html/index.html
+EOT
+
+user_data_replace_on_change = true
+```
+
+Without `user_data_replace_on_change = true`, user_data edits do NOT apply
+to existing instances.
+
 ## Module inputs/outputs
 
 - Inputs validated with `default` only for non-secret, stable values.
@@ -62,7 +106,14 @@ resource "aws_security_group_rule" "ingress" {
 
 ## Checklist before finishing
 
-1. `terraform fmt -recursive`
-2. `terraform validate`
-3. No secrets introduced, no existing functionality weakened
-4. Ask user to confirm before `apply`
+1. No secrets introduced, no existing functionality weakened
+2. Ask the engineer to run:
+
+```powershell
+terraform fmt -recursive
+terraform init
+terraform validate
+terraform plan
+```
+
+3. Ask user to confirm the plan before the engineer applies

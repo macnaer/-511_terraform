@@ -1,22 +1,31 @@
 ---
 name: terraform-workflow
-description: Standard Terraform change workflow for this AWS repo — fmt, init, validate, plan, apply, secrets handling via secrets.auto.tfvars, and PowerShell command quirks. Use when making any change to .tf files, reviewing a plan, or deploying infrastructure.
+description: Standard Terraform change workflow for this AWS repo — how to prepare changes, hand commands to the engineer, secrets handling via secrets.auto.tfvars, and PowerShell command quirks. Use when making any change to .tf files or advising on plan/apply.
 ---
 
 # Terraform Workflow
 
-## Standard cycle (always in this order)
+## Golden rule
+
+**The agent NEVER executes Terraform.** Every `terraform` command (`init`,
+`fmt`, `validate`, `plan`, `apply`, `destroy`, `state`, ...) is run manually
+by the engineer. The agent writes/analyzes code and provides the exact
+commands, ready to copy-paste.
+
+AWS CLI diagnostics (`aws ec2 describe-...`) do not modify infrastructure
+and may be used by the agent to inspect reality.
+
+## Standard cycle (executed by the engineer)
 
 ```powershell
 terraform fmt -recursive
 terraform init
 terraform validate
 terraform plan
-terraform apply     # only after explicit user confirmation of the plan
+terraform apply     # only after explicit approval of the plan
 ```
 
-Never run `apply` or `destroy` without showing the user the plan and getting
-explicit approval first.
+Never advise `apply` or `destroy` without the user first approving the plan.
 
 ## Secrets
 
@@ -53,9 +62,17 @@ Never persist these env vars across commands; set them per invocation.
 - Commit and push only when the user explicitly asks.
 - Before committing: `git status` + `git diff` — verify no secrets staged.
 
-## After changes
+## After making changes
 
-1. `terraform fmt -check -recursive` must pass silently.
-2. `terraform validate` must succeed.
-3. `terraform plan` when credentials are available — report drift if any.
-4. Report what changed and remaining risks in 3–5 lines.
+1. Hand the engineer these commands and ask them to run:
+
+```powershell
+terraform fmt -recursive
+terraform init
+terraform validate
+terraform plan
+```
+
+2. Ask the engineer to report the plan output; analyze it for unexpected
+   replacements/drift before advising `apply`.
+3. Report what changed and remaining risks in 3–5 lines.
